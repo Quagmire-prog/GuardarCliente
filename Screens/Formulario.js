@@ -2,11 +2,12 @@ import { StyleSheet, Text, View, TextInput, Alert, Image, TouchableOpacity, Scro
 import React, { useState } from 'react'
 import { Picker } from '@react-native-picker/picker'
 import { useNavigation } from '@react-navigation/native';
+import { KeyboardAvoidingView, Platform } from 'react-native';
 
 
 
-export default function Formulario({route}) {
-    const { clientes , setClientes} = route.params;
+export default function Formulario({ route }) {
+    const { guardarNuevo } = route.params;
 
     const [Cedula, setCedula] = useState('');
     const [Nombres, setNombres] = useState('');
@@ -14,23 +15,30 @@ export default function Formulario({route}) {
     const [FechadeNacimiento, setFechadeNacimiento] = useState('');
     const [Sexo, setSexo] = useState('');
     const navigation = useNavigation();
-    
+
 
     const Guardar = () => {
-        if (!Cedula || !Nombres) return null;
+        if (!Cedula || !Nombres) return (
+            Alert.alert('Rellene los campos', `
+                 Cedula
+                Nombres 
+                `
+            )
+        );
         const nuevocliente = {
             Cedula: Cedula,
             Nombres: Nombres,
-            Apellido: Apellidos,
-            Fechanac: FechadeNacimiento,
+            Apellidos: Apellidos,
+            FechadeNacimiento: FechadeNacimiento,
             Sexo: Sexo
         }
-        setClientes([nuevocliente, ...clientes])
+
+        guardarNuevo(nuevocliente)
         Alert.alert('Datos almacenados', `
       cedula: ${Cedula}
       nombres: ${Nombres}
-      apellidos: ${Apellidos}
-      fecha nacimiento: ${FechadeNacimiento}
+      Apellidos: ${Apellidos}
+      FechadeNacimiento: ${FechadeNacimiento}
       sexo: ${Sexo}
     `);
         setCedula('');
@@ -43,70 +51,76 @@ export default function Formulario({route}) {
 
 
     return (
-        <ScrollView>
-            <View style={styles.container}>
+        <KeyboardAvoidingView //permite scrollear cuando el teclado esta activo y evitar estarce saiendo del teclado para rellenar campos ocultos
+            style={{ flex: 1 }}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={100}
+        >
+            <ScrollView>
+                <View style={styles.container}>
 
 
-                <Image style={styles.imagen} source={require('../assets/Imagenes/titulo.png')}></Image>
+                    <Image style={styles.imagen} source={require('../assets/Imagenes/titulo.png')}></Image>
 
-                <View>
+                    <View>
 
-                    <Text style={styles.label}>Cedula</Text>
+                        <Text style={styles.label}>Cedula</Text>
 
-                    <TextInput
-                        style={styles.input}
-                        value={Cedula}
-                        onChangeText={setCedula}
-                        placeholder='ej: 000-000000-0000A'
-                    />
+                        <TextInput
+                            style={styles.input}
+                            value={Cedula}
+                            onChangeText={setCedula}
+                            placeholder='ej: 000-000000-0000A'
+                        />
 
-                    <Text style={styles.label}>Nombres</Text>
-                    <TextInput
-                        style={styles.input}
-                        value={Nombres}
-                        onChangeText={setNombres}
-                        placeholder='ej: Juan Carlos'
-                    />
-                    <Text style={styles.label}>Apellidos</Text>
-                    <TextInput
-                        style={styles.input}
-                        value={Apellidos}
-                        onChangeText={setApellidos}
-                        placeholder='ej: Perez Lopes'
-                    />
-                    <Text style={styles.label}>Fecha de Nacimiento</Text>
-                    <TextInput
-                        style={styles.input}
-                        value={FechadeNacimiento}
-                        onChangeText={setFechadeNacimiento}
-                        placeholder='ej: YYYY-MM-DD'
-                    />
-                    <Text style={styles.label}>Sexo</Text>
-                    <View style={styles.Picker}>
-                        <Picker
-                            selectedValue={Sexo}
-                            onValueChange={(itemValue) => setSexo(itemValue)}
-                        >
-                            <Picker.Item label="Selecione..." value="" />
-                            <Picker.Item label="Masculino" value="Masculino" />
-                            <Picker.Item label="Femenino" value="Femenino" />
-                        </Picker>
+                        <Text style={styles.label}>Nombres</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={Nombres}
+                            onChangeText={setNombres}
+                            placeholder='ej: Juan Carlos'
+                        />
+                        <Text style={styles.label}>Apellidos</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={Apellidos}
+                            onChangeText={setApellidos}
+                            placeholder='ej: Perez Lopes'
+                        />
+                        <Text style={styles.label}>Fecha de Nacimiento</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={FechadeNacimiento}
+                            onChangeText={setFechadeNacimiento}
+                            placeholder='ej: YYYY-MM-DD'
+                        />
+                        <Text style={styles.label}>Sexo</Text>
+                        <View style={styles.Picker}>
+                            <Picker
+                                selectedValue={Sexo}
+                                onValueChange={(itemValue) => setSexo(itemValue)}
+                            >
+                                <Picker.Item label="Selecione..." value="" />
+                                <Picker.Item label="Masculino" value="Masculino" />
+                                <Picker.Item label="Femenino" value="Femenino" />
+                            </Picker>
+                        </View>
                     </View>
-                </View>
-                <View style={styles.boton}>
-                    <TouchableOpacity style={styles.tboton} onPress={Guardar}>
-                        <Text style={styles.textoboton}>Guardar</Text>
-                    </TouchableOpacity>
-                </View>
-                {/* <View style={styles.boton}>
+                    <View style={styles.boton}>
+                        <TouchableOpacity style={styles.tboton} onPress={Guardar}>
+                            <Text style={styles.textoboton}>Guardar</Text>
+                        </TouchableOpacity>
+                    </View>
+                    {/* <View style={styles.boton}>
                     <TouchableOpacity style={styles.tboton} onPress={() => navigation.navigate('ListarClientes', { clientes })}>
                         <Text style={styles.textoboton}> lista de clientes</Text>
                     </TouchableOpacity>
 
                 </View> */}
 
-            </View>
-        </ScrollView>
+                </View>
+            </ScrollView>
+        </KeyboardAvoidingView >
 
     )
 }
