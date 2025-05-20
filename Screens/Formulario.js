@@ -107,7 +107,10 @@ export default function Formulario({ route }) {
                         </View>
                     </View>
                     <View style={styles.boton}>
-                        <TouchableOpacity style={styles.tboton} onPress={Guardar}>
+                        <TouchableOpacity style={styles.tboton} onPress={() => {
+                            Guardar();
+                            navigation.goBack();
+                        }}>
                             <Text style={styles.textoboton}>Guardar</Text>
                         </TouchableOpacity>
                     </View>

@@ -1,16 +1,16 @@
 import { ScrollView, StyleSheet, Text, View, TouchableOpacity, Alert } from 'react-native'
 import React, { useState } from 'react'
-
-
-
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 
+import { collection, getFirestore, query, doc, setDoc, getDocs } from 'firebase/firestore';
+import appFirebase from '../BasedeDatos/Firebase';
+const db = getFirestore(appFirebase);
 
 export default function ListarClientes({ navigation }) {
     const [clientes, setClientes] = useState([]);
-    const guardarNuevo = (nuevo) => {
-        setClientes([...clientes, nuevo])
+    const guardarNuevo =  async(nuevo) => {
+        await setDoc(doc(db,"Cliente",nuevo.Cedula),nuevo);
     };
     const Eliminar = (index) => {
         Alert.alert(
@@ -113,29 +113,29 @@ const styles = StyleSheet.create({
 
 
     },
-   header: {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  backgroundColor: '#d6f5d6',
-  padding: 10,
-  borderRadius: 10,
-  marginBottom: 15,
-},
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: '#d6f5d6',
+        padding: 10,
+        borderRadius: 10,
+        marginBottom: 15,
+    },
 
-titulo: {
-  fontSize: 20,
-  fontWeight: 'bold',
-  color: 'green',
-},
+    titulo: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: 'green',
+    },
 
-tbotonf: {
-  backgroundColor: '#ccffcc',
-  padding: 5,
-  borderRadius: 10,
-  borderWidth:1,
-  borderColor: 'green'
-}
+    tbotonf: {
+        backgroundColor: '#ccffcc',
+        padding: 5,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: 'green'
+    }
 
 
 
