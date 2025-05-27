@@ -1,18 +1,33 @@
 import { ScrollView, StyleSheet, Text, View, TouchableOpacity, Alert } from 'react-native'
-import React, { useState } from 'react'
+import React, { cloneElement, useEffect, useState } from 'react'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 
-import { collection, getFirestore, query, doc, setDoc, getDocs } from 'firebase/firestore';
+import { collection, getFirestore, query, doc, setDoc, getDocs, deleteDoc } from 'firebase/firestore';
 import appFirebase from '../BasedeDatos/Firebase';
 const db = getFirestore(appFirebase);
 
 export default function ListarClientes({ navigation }) {
     const [clientes, setClientes] = useState([]);
-    const guardarNuevo =  async(nuevo) => {
-        await setDoc(doc(db,"Cliente",nuevo.Cedula),nuevo);
+
+    const listarcliente = async () => {
+        const q = query (collection(db, "Cliente"));
+        const querySnapshot = await getDocs (q);
+        const lista =[];
+        querySnapshot.forEach((doc) => {
+            lista.push(doc.data());
+        });
+        setClientes(lista);
     };
-    const Eliminar = (index) => {
+
+    useEffect(()=>{
+        listarcliente();
+    },[clientes]);
+
+    const guardarNuevo = async (nuevo) => {
+        await setDoc(doc(db, "Cliente", nuevo.Cedula), nuevo);
+    };
+    const Eliminar = (Cedula) => {
         Alert.alert(
             'Confirmar eliminacion',
             'Estas seguro que deseas eliminar el reguistro?',
@@ -25,10 +40,9 @@ export default function ListarClientes({ navigation }) {
                 {
                     text: 'Eliminar',
                     style: 'destructive',
-                    onPress: () => {
-                        const nuevaLista = [...clientes];
-                        nuevaLista.splice(index, 1);
-                        setClientes(nuevaLista);
+                    onPress: async () => {
+                        await deleteDoc(doc(db, 'Cliente', Cedula));
+                         
                     }
                 }
             ],
@@ -43,7 +57,9 @@ export default function ListarClientes({ navigation }) {
                 <TouchableOpacity style={styles.tbotonf} onPress={() => navigation.navigate('Formulario', { guardarNuevo })}>
                     <AntDesign name="adduser" size={30} color="green" />
                 </TouchableOpacity>
+              
             </View>
+            
 
             {clientes.length === 0 ? (
                 <View style={styles.card}>
@@ -65,8 +81,11 @@ export default function ListarClientes({ navigation }) {
                                 <Text style={styles.label}>Sexo:<Text >{i.Sexo}</Text> </Text>
                             </View>
                             <View style={styles.botonformulario}>
-                                <TouchableOpacity style={styles.tboton} onPress={Eliminar}>
+                                <TouchableOpacity style={styles.tboton} onPress={()=> Eliminar(i.Cedula)}>
                                     <MaterialIcons name="delete" size={40} color="red" />
+                                </TouchableOpacity>
+                                 <TouchableOpacity style={styles.tboton} onPress={()=> navigation.navigate('Formulario', {guardarNuevo, clienteEditar : i}) }>
+                                    <MaterialIcons name="edit" size={40} color="blue" />
                                 </TouchableOpacity>
                             </View>
                         </View>

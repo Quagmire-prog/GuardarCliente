@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, TextInput, Alert, Image, TouchableOpacity, ScrollView } from 'react-native'
-import React, { useState } from 'react'
+import React, { use, useEffect, useState } from 'react'
 import { Picker } from '@react-native-picker/picker'
 import { useNavigation } from '@react-navigation/native';
 import { KeyboardAvoidingView, Platform } from 'react-native';
@@ -7,7 +7,7 @@ import { KeyboardAvoidingView, Platform } from 'react-native';
 
 
 export default function Formulario({ route }) {
-    const { guardarNuevo } = route.params;
+    const { guardarNuevo, clienteEditar } = route.params;
 
     const [Cedula, setCedula] = useState('');
     const [Nombres, setNombres] = useState('');
@@ -16,6 +16,15 @@ export default function Formulario({ route }) {
     const [Sexo, setSexo] = useState('');
     const navigation = useNavigation();
 
+    useEffect(() => {
+        if (clienteEditar) {
+            setCedula(clienteEditar.Cedula);
+            setNombres(clienteEditar.Nombres);
+            setApellidos(clienteEditar.Apellidos);
+            setFechadeNacimiento(clienteEditar.FechadeNacimiento);
+            setSexo(clienteEditar.Sexo);
+        }
+    }, []);
 
     const Guardar = () => {
         if (!Cedula || !Nombres) return (
@@ -34,7 +43,8 @@ export default function Formulario({ route }) {
         }
 
         guardarNuevo(nuevocliente)
-        Alert.alert('Datos almacenados', `
+        const mensaje = clienteEditar ? 'cliente actulizado correctamente': 'Datos almacenado correctamente'
+        Alert.alert(mensaje, `
       cedula: ${Cedula}
       nombres: ${Nombres}
       Apellidos: ${Apellidos}
@@ -71,6 +81,7 @@ export default function Formulario({ route }) {
                             value={Cedula}
                             onChangeText={setCedula}
                             placeholder='ej: 000-000000-0000A'
+                            editable={!clienteEditar}
                         />
 
                         <Text style={styles.label}>Nombres</Text>
@@ -103,6 +114,8 @@ export default function Formulario({ route }) {
                                 <Picker.Item label="Selecione..." value="" />
                                 <Picker.Item label="Masculino" value="Masculino" />
                                 <Picker.Item label="Femenino" value="Femenino" />
+                                 <Picker.Item label="Elicoptero apache de combate" value="Elicoptero apache de combate" />
+                                  <Picker.Item label="prefiero no decirlo" value="🏳️‍🌈?" />
                             </Picker>
                         </View>
                     </View>
@@ -111,7 +124,8 @@ export default function Formulario({ route }) {
                             Guardar();
                             navigation.goBack();
                         }}>
-                            <Text style={styles.textoboton}>Guardar</Text>
+                            <Text style={styles.textoboton}>{clienteEditar ? 'Actualizar cliente': 'Guardar clientes'}
+                            </Text>
                         </TouchableOpacity>
                     </View>
                     {/* <View style={styles.boton}>
