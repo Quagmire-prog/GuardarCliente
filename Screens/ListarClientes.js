@@ -1,7 +1,8 @@
-import { ScrollView, StyleSheet, Text, View, TouchableOpacity, Alert } from 'react-native'
+import { ScrollView, StyleSheet, Text, View, TouchableOpacity, Alert,KeyboardAvoidingView,  Platform  } from 'react-native'
 import React, { cloneElement, useEffect, useState } from 'react'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { TextInput } from 'react-native';
 
 import { collection, getFirestore, query, doc, setDoc, getDocs, deleteDoc } from 'firebase/firestore';
 import appFirebase from '../BasedeDatos/Firebase';
@@ -9,20 +10,22 @@ const db = getFirestore(appFirebase);
 
 export default function ListarClientes({ navigation }) {
     const [clientes, setClientes] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [clientesFiltrados, setClientesFiltrados] = useState([]);
 
     const listarcliente = async () => {
-        const q = query (collection(db, "Cliente"));
-        const querySnapshot = await getDocs (q);
-        const lista =[];
+        const q = query(collection(db, "Cliente"));
+        const querySnapshot = await getDocs(q);
+        const lista = [];
         querySnapshot.forEach((doc) => {
             lista.push(doc.data());
         });
         setClientes(lista);
     };
 
-    useEffect(()=>{
-        listarcliente();
-    },[clientes]);
+    // useEffect(() => {
+    //     listarcliente();
+    // }, [clientes]);
 
     const guardarNuevo = async (nuevo) => {
         await setDoc(doc(db, "Cliente", nuevo.Cedula), nuevo);
@@ -42,13 +45,51 @@ export default function ListarClientes({ navigation }) {
                     style: 'destructive',
                     onPress: async () => {
                         await deleteDoc(doc(db, 'Cliente', Cedula));
-                         
+
                     }
                 }
             ],
             { cancelable: true }
         )
     };
+
+    const buscarCliente = (texto) => {
+        setSearchTerm(texto);
+        if (texto.trim() === '') {
+            setClientesFiltrados(clientes);
+            return;
+        }
+
+        const resultados = clientes.filter(cliente => {
+            const textoLower = texto.toLowerCase();
+            return (
+                cliente.Cedula.toLowerCase().includes(textoLower) ||
+                cliente.Nombres.toLowerCase().includes(textoLower) ||
+                cliente.Apellidos.toLowerCase().includes(textoLower) ||
+                cliente.FechadeNacimiento.toLowerCase().includes(textoLower) ||
+                cliente.Sexo.toLowerCase().includes(textoLower)
+            );
+        });
+
+        setClientesFiltrados(resultados);
+    };
+
+    useEffect(() => {
+        const cargarClientes = async () => {
+            const q = query(collection(db, "Cliente"));
+            const querySnapshot = await getDocs(q);
+            const lista = [];
+            querySnapshot.forEach((doc) => {
+                lista.push(doc.data());
+            });
+            setClientes(lista);
+            setClientesFiltrados(lista); // Inicializa con todos los clientes
+        };
+        cargarClientes();
+    }, []);
+
+
+
     return (
 
         <View style={styles.container}>
@@ -57,18 +98,35 @@ export default function ListarClientes({ navigation }) {
                 <TouchableOpacity style={styles.tbotonf} onPress={() => navigation.navigate('Formulario', { guardarNuevo })}>
                     <AntDesign name="adduser" size={30} color="green" />
                 </TouchableOpacity>
-              
+
             </View>
-            
+            <TextInput
+                style={{
+                    backgroundColor: '#fff',
+                    padding: 10,
+                    borderRadius: 10,
+                    borderColor: '#ccc',
+                    borderWidth: 1,
+                    marginBottom: 15
+                }}
+                placeholder="Buscar por cédula, nombre, sexo, etc..."
+                value={searchTerm}
+                onChangeText={buscarCliente}
+            />
+
 
             {clientes.length === 0 ? (
                 <View style={styles.card}>
                     <Text > No hay clientes registrados.</Text>
                 </View>
             ) : (
-
+                <KeyboardAvoidingView //permite scrollear cuando el teclado esta activo y evitar estarce saiendo del teclado para rellenar campos ocultos
+                            style={{ flex: 1 }}
+                            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                            keyboardVerticalOffset={100}
+                        >
                 <ScrollView style={styles.lista}>
-                    {clientes.map((i, index) =>
+                    {clientesFiltrados.map((i, index) =>
                     (
                         <View key={index} style={styles.card}>
 
@@ -81,10 +139,10 @@ export default function ListarClientes({ navigation }) {
                                 <Text style={styles.label}>Sexo:<Text >{i.Sexo}</Text> </Text>
                             </View>
                             <View style={styles.botonformulario}>
-                                <TouchableOpacity style={styles.tboton} onPress={()=> Eliminar(i.Cedula)}>
+                                <TouchableOpacity style={styles.tboton} onPress={() => Eliminar(i.Cedula)}>
                                     <MaterialIcons name="delete" size={40} color="red" />
                                 </TouchableOpacity>
-                                 <TouchableOpacity style={styles.tboton} onPress={()=> navigation.navigate('Formulario', {guardarNuevo, clienteEditar : i}) }>
+                                <TouchableOpacity style={styles.tboton} onPress={() => navigation.navigate('Formulario', { guardarNuevo, clienteEditar: i })}>
                                     <MaterialIcons name="edit" size={40} color="blue" />
                                 </TouchableOpacity>
                             </View>
@@ -92,6 +150,7 @@ export default function ListarClientes({ navigation }) {
 
                     ))}
                 </ScrollView>
+                </KeyboardAvoidingView>
 
             )}
 

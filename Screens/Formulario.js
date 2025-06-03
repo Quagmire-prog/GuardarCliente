@@ -114,7 +114,7 @@ export default function Formulario({ route }) {
                                 <Picker.Item label="Selecione..." value="" />
                                 <Picker.Item label="Masculino" value="Masculino" />
                                 <Picker.Item label="Femenino" value="Femenino" />
-                                 <Picker.Item label="Elicoptero apache de combate" value="Elicoptero apache de combate" />
+                                 <Picker.Item label="Helicoptero apache de combate" value="Elicoptero apache de combate" />
                                   <Picker.Item label="prefiero no decirlo" value="🏳️‍🌈?" />
                             </Picker>
                         </View>
