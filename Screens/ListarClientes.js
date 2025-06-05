@@ -1,5 +1,5 @@
 import { ScrollView, StyleSheet, Text, View, TouchableOpacity, Alert, KeyboardAvoidingView, Platform } from 'react-native'
-import React, { cloneElement, useEffect,     useState } from 'react'
+import React, { cloneElement, useEffect, useState } from 'react'
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -33,16 +33,21 @@ export default function ListarClientes({ navigation }) {
                     text: 'Eliminar',
                     style: 'destructive',
                     onPress: async () => {
-                        await deleteDoc(doc(db, 'Cliente', Cedula));
-                        await cargarClientes();
-
+                        try {
+                            await deleteDoc(doc(db, 'Cliente', Cedula));
+                            await cargarClientes(); // Recargar la lista
+                            Alert.alert('Eliminado', 'El cliente ha sido eliminado correctamente.');
+                        } catch (error) {
+                            Alert.alert('Error', 'No se pudo eliminar el cliente. Intenta de nuevo.');
+                            console.error('Error eliminando cliente:', error);
+                        }
                     }
                 }
             ],
             { cancelable: true }
         )
     };
-//
+    //
     const buscarCliente = (texto) => {
         setSearchTerm(texto);
         if (texto.trim() === '') {
@@ -73,13 +78,13 @@ export default function ListarClientes({ navigation }) {
         setClientes(lista);
         setClientesFiltrados(lista);
     };
-//
+    //
     useFocusEffect(
         useCallback(() => {
             cargarClientes();
         }, [])
     );
-   
+
 
 
 
