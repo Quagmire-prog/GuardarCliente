@@ -15,21 +15,6 @@ export default function ListarClientes({ navigation }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [clientesFiltrados, setClientesFiltrados] = useState([]);
 
-    // const listarcliente = async () => {
-    //     const q = query(collection(db, "Cliente"));
-    //     const querySnapshot = await getDocs(q);
-    //     const lista = [];
-    //     querySnapshot.forEach((doc) => {
-    //         lista.push(doc.data());
-    //     });
-    //     setClientes(lista);
-    //     setClientesFiltrados(lista);
-    // };
-
-    // useEffect(() => {
-    //     listarcliente();
-    // }, []);
-
     const guardarNuevo = async (nuevo) => {
         await setDoc(doc(db, "Cliente", nuevo.Cedula), nuevo);
 
@@ -49,6 +34,7 @@ export default function ListarClientes({ navigation }) {
                     style: 'destructive',
                     onPress: async () => {
                         await deleteDoc(doc(db, 'Cliente', Cedula));
+                        await cargarClientes();
 
                     }
                 }
@@ -56,7 +42,7 @@ export default function ListarClientes({ navigation }) {
             { cancelable: true }
         )
     };
-
+//
     const buscarCliente = (texto) => {
         setSearchTerm(texto);
         if (texto.trim() === '') {
@@ -87,15 +73,13 @@ export default function ListarClientes({ navigation }) {
         setClientes(lista);
         setClientesFiltrados(lista);
     };
-
+//
     useFocusEffect(
         useCallback(() => {
             cargarClientes();
         }, [])
     );
-    // useEffect(() => {
-    //     cargarClientes();
-    // }, []);
+   
 
 
 
