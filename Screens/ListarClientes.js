@@ -1,5 +1,7 @@
-import { ScrollView, StyleSheet, Text, View, TouchableOpacity, Alert,KeyboardAvoidingView,  Platform  } from 'react-native'
-import React, { cloneElement, useEffect, useState } from 'react'
+import { ScrollView, StyleSheet, Text, View, TouchableOpacity, Alert, KeyboardAvoidingView, Platform } from 'react-native'
+import React, { cloneElement, useEffect,     useState } from 'react'
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { TextInput } from 'react-native';
@@ -13,22 +15,24 @@ export default function ListarClientes({ navigation }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [clientesFiltrados, setClientesFiltrados] = useState([]);
 
-    const listarcliente = async () => {
-        const q = query(collection(db, "Cliente"));
-        const querySnapshot = await getDocs(q);
-        const lista = [];
-        querySnapshot.forEach((doc) => {
-            lista.push(doc.data());
-        });
-        setClientes(lista);
-    };
+    // const listarcliente = async () => {
+    //     const q = query(collection(db, "Cliente"));
+    //     const querySnapshot = await getDocs(q);
+    //     const lista = [];
+    //     querySnapshot.forEach((doc) => {
+    //         lista.push(doc.data());
+    //     });
+    //     setClientes(lista);
+    //     setClientesFiltrados(lista);
+    // };
 
     // useEffect(() => {
     //     listarcliente();
-    // }, [clientes]);
+    // }, []);
 
     const guardarNuevo = async (nuevo) => {
         await setDoc(doc(db, "Cliente", nuevo.Cedula), nuevo);
+
     };
     const Eliminar = (Cedula) => {
         Alert.alert(
@@ -73,21 +77,25 @@ export default function ListarClientes({ navigation }) {
 
         setClientesFiltrados(resultados);
     };
+    const cargarClientes = async () => {
+        const q = query(collection(db, "Cliente"));
+        const querySnapshot = await getDocs(q);
+        const lista = [];
+        querySnapshot.forEach((doc) => {
+            lista.push(doc.data());
+        });
+        setClientes(lista);
+        setClientesFiltrados(lista);
+    };
 
-    useEffect(() => {
-        const cargarClientes = async () => {
-            const q = query(collection(db, "Cliente"));
-            const querySnapshot = await getDocs(q);
-            const lista = [];
-            querySnapshot.forEach((doc) => {
-                lista.push(doc.data());
-            });
-            setClientes(lista);
-            setClientesFiltrados(lista); 
-           
-        };
-        cargarClientes();
-    }, []);
+    useFocusEffect(
+        useCallback(() => {
+            cargarClientes();
+        }, [])
+    );
+    // useEffect(() => {
+    //     cargarClientes();
+    // }, []);
 
 
 
@@ -122,35 +130,35 @@ export default function ListarClientes({ navigation }) {
                 </View>
             ) : (
                 <KeyboardAvoidingView //permite scrollear cuando el teclado esta activo y evitar estarce saiendo del teclado para rellenar campos ocultos
-                            style={{ flex: 1 }}
-                            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                            keyboardVerticalOffset={100}
-                        >
-                <ScrollView style={styles.lista}>
-                    {clientesFiltrados.map((i, index) =>
-                    (
-                        <View key={index} style={styles.card}>
+                    style={{ flex: 1 }}
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    keyboardVerticalOffset={100}
+                >
+                    <ScrollView style={styles.lista}>
+                        {clientesFiltrados.map((i, index) =>
+                        (
+                            <View key={index} style={styles.card}>
 
-                            <View>
-                                <Text style={styles.label}>#<Text>{index + 1}</Text></Text>
-                                <Text style={styles.label}>Cédula:<Text >{i.Cedula}</Text> </Text>
-                                <Text style={styles.label}>Nombres:<Text >{i.Nombres}</Text> </Text>
-                                <Text style={styles.label}>Apellidos:<Text >{i.Apellidos}</Text> </Text>
-                                <Text style={styles.label}>Fecha de nacimiento:<Text > {i.FechadeNacimiento}</Text></Text>
-                                <Text style={styles.label}>Sexo:<Text >{i.Sexo}</Text> </Text>
+                                <View>
+                                    <Text style={styles.label}>#<Text>{index + 1}</Text></Text>
+                                    <Text style={styles.label}>Cédula:<Text >{i.Cedula}</Text> </Text>
+                                    <Text style={styles.label}>Nombres:<Text >{i.Nombres}</Text> </Text>
+                                    <Text style={styles.label}>Apellidos:<Text >{i.Apellidos}</Text> </Text>
+                                    <Text style={styles.label}>Fecha de nacimiento:<Text > {i.FechadeNacimiento}</Text></Text>
+                                    <Text style={styles.label}>Sexo:<Text >{i.Sexo}</Text> </Text>
+                                </View>
+                                <View style={styles.botonformulario}>
+                                    <TouchableOpacity style={styles.tboton} onPress={() => Eliminar(i.Cedula)}>
+                                        <MaterialIcons name="delete" size={40} color="red" />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={styles.tboton} onPress={() => navigation.navigate('Formulario', { guardarNuevo, clienteEditar: i })}>
+                                        <MaterialIcons name="edit" size={40} color="blue" />
+                                    </TouchableOpacity>
+                                </View>
                             </View>
-                            <View style={styles.botonformulario}>
-                                <TouchableOpacity style={styles.tboton} onPress={() => Eliminar(i.Cedula)}>
-                                    <MaterialIcons name="delete" size={40} color="red" />
-                                </TouchableOpacity>
-                                <TouchableOpacity style={styles.tboton} onPress={() => navigation.navigate('Formulario', { guardarNuevo, clienteEditar: i })}>
-                                    <MaterialIcons name="edit" size={40} color="blue" />
-                                </TouchableOpacity>
-                            </View>
-                        </View>
 
-                    ))}
-                </ScrollView>
+                        ))}
+                    </ScrollView>
                 </KeyboardAvoidingView>
 
             )}
