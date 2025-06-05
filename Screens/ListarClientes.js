@@ -83,7 +83,8 @@ export default function ListarClientes({ navigation }) {
                 lista.push(doc.data());
             });
             setClientes(lista);
-            setClientesFiltrados(lista); // Inicializa con todos los clientes
+            setClientesFiltrados(lista); 
+           
         };
         cargarClientes();
     }, []);
